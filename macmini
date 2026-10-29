@@ -32,7 +32,7 @@ REPO="${MACMINI_REPO:-$HOME/Developer/macmini-tmux}"   # --update 用的本地�
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
 
 # 版本号：与仓库根 VERSION 文件必须一致（install.sh 会校验，不一致就拒绝安装）
-VERSION="0.3.0"
+VERSION="0.3.1"
 
 usage() {
   awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
@@ -67,30 +67,33 @@ recent_session() {
 }
 
 # 连上某个 tmux 会话（et 优先；在 tmux 里或 et 不存在时回退 ssh）
-# et 的 --attach 失败时会把提示打到 stdout 且无法静默，所以会产生一行「No saved session」——
-# 只会出现在「该 et 会话还不存在」（即首次连接 / 会话已过期）的时候，随后立刻正常连上。
 connect() {
-  local name="$1"
-  local remote_cmd="exec tmux attach -t '$name'"
+  local tmux_name="$1"
+  # et 的会话名不允许 # 和空格（会报 Invalid session name），把非法字符换成 -
+  # （tmux 会话名本身不变，用户看到/使用的仍然是 session#1 这种）
+  local et_name
+  et_name=$(printf '%s' "$tmux_name" | tr '# :' '---')
 
   # 关键：用 ssh 先在后台把 tmux 会话建好（已存在就忽略报错）。
   # 不能把 `tmux new-session -d` 放在 et 的远端命令里——et 断开时会把它的进程树一起收走，
   # 实测导致 tmux 会话跟着消失。用 ssh 建好后，会话生命周期就与 et 无关，断线重连才能真正接回。
-  ssh "$HOST" "tmux new-session -d -s '$name' 2>/dev/null; true" >/dev/null 2>&1
+  ssh "$HOST" "tmux new-session -d -s '$tmux_name' 2>/dev/null; true" >/dev/null 2>&1
 
   # et 在本机 tmux 内不可用（macOS 26 兼容问题），直接用 ssh
   if [ -n "${TMUX:-}" ]; then
-    exec ssh -t "$HOST" "$remote_cmd"
+    exec ssh -t "$HOST" "exec tmux attach -t '$tmux_name'"
   fi
 
   if command -v et >/dev/null 2>&1; then
-    # 先试接回已有 et 会话；没有就新建一个（远端只负责 attach，会话已由上面的 ssh 建好）
-    et --attach "$name" || exec et --name "$name" "${ET_USER}@${HOST}" "$remote_cmd"
-    exit 0
+    # 直接建新的 et 会话：不再先试 --attach——
+    # 它失败时会把服务端所有会话名一股脑列到屏幕上，噪音极大且看不出是否连上。
+    # tmux 会话由上面的 ssh 保证存在，所以 et 层每次新建完全不影响「接回同一个工作区」。
+    # --disconnect-timeout 让断开后的旧 et 会话 10 分钟后自动过期，不会无限累积。
+    exec et --name "$et_name" --disconnect-timeout 10 "${ET_USER}@${HOST}" "exec tmux attach -t '$tmux_name'"
   fi
 
   # 没装 et：回退到原来的 ssh 行为
-  exec ssh -t "$HOST" "$remote_cmd"
+  exec ssh -t "$HOST" "exec tmux attach -t '$tmux_name'"
 }
 
 # 从本地仓库拉最新版并重新安装
