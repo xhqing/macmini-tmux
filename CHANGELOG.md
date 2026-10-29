@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2] - 2026-10-29
+
+### 变更（`macmini-tmux` 改为真实副本 + 主推项目名）
+
+- **为什么改**：用户指出两点。① `macmini-tmux` 原来是软链接，删掉/替换 `macmini` 就会连带失效，要的是**真实脚本文件**；② `macmini --version` 语义含混——看着像在问「macmini 这台电脑的版本」，用项目名 `macmini-tmux --version` 一眼就知道是这套 tmux 工具的版本。
+- **改了什么**：`install.sh` 现在用 `install` 部署**两份真实副本**（`macmini-tmux` + 短别名 `macmini`），不再建软链接；帮助、提示文案、README 全部改用 `macmini-tmux` 作为主名（`macmini` 作为短别名保留，用法完全一致）。
+- **验证**：`ls -l ~/.local/bin/macmini*` 两个都是普通文件；`macmini-tmux --version` / `--update` / `tmux -l` 全部正常。
+
 ## [0.3.1] - 2026-10-29
 
 ### 修复（et 会话名不兼容 `#`，默认命名直接连不上）

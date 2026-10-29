@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# macmini —— 操作 macmini 的统一入口
+# macmini-tmux —— 操作 macmini 的统一入口
 #
 # 用法：
-#   macmini tmux              每次开一个新会话，名字自动递增（session#1、session#2 …）
-#   macmini tmux -s <名字>    接上该名字的会话；没有就新建（断线重连用这条）
-#   macmini tmux <名字>       同上，省略 -s 的写法
-#   macmini tmux -a           接回最近一次进去过的会话（按最后一次 attach 的时间算）
-#   macmini tmux -l           列出 macmini 上现有的 tmux 会话
-#   macmini <其它命令...>     直接在 macmini 上跑（带终端），例如 macmini df -h
-#   macmini --version         显示当前安装的版本号
-#   macmini --update          从本地仓库拉取最新版并重新安装
-#   macmini -h                显示本帮助
+#   macmini-tmux tmux          每次开一个新会话，名字自动递增（session#1、session#2 …）
+#   macmini-tmux tmux -s <名> 接上该名字的会话；没有就新建（断线重连用这条）
+#   macmini-tmux tmux <名字>  同上，省略 -s 的写法
+#   macmini-tmux tmux -a      接回最近一次进去过的会话（按最后一次 attach 的时间算）
+#   macmini-tmux tmux -l      列出 macmini 上现有的 tmux 会话
+#   macmini-tmux <命令...>    直接把命令透传到 macmini 执行，例如 macmini-tmux df -h
+#   macmini-tmux --version    显示当前安装的版本号
+#   macmini-tmux --update     从本地仓库拉取最新版并重新安装
+#   macmini-tmux -h           显示本帮助
+#
+#   （`macmini` 是同一脚本的短别名副本，两个名字用法完全一样；
+#     涉及 --version / --update 这类含义不清的写法时，推荐用 macmini-tmux）
 #
 # 背景：
 #   * 传输层用 et（Eternal Terminal）而不是 ssh：et 有**本地回显**——按键先在本地显示、
@@ -32,7 +35,7 @@ REPO="${MACMINI_REPO:-$HOME/Developer/macmini-tmux}"   # --update 用的本地�
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
 
 # 版本号：与仓库根 VERSION 文件必须一致（install.sh 会校验，不一致就拒绝安装）
-VERSION="0.3.1"
+VERSION="0.3.2"
 
 usage() {
   awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
@@ -147,7 +150,7 @@ case "$cmd" in
           shift
           ;;
         -l|--list)
-          ssh -t "$HOST" 'tmux ls' 2>/dev/null || echo "（macmini 上还没有任何 tmux 会话，直接 macmini tmux 就会新建一个）"
+          ssh -t "$HOST" 'tmux ls' 2>/dev/null || echo "（macmini 上还没有任何 tmux 会话，直接 macmini-tmux tmux 就会新建一个）"
           exit $?
           ;;
         -h|--help) usage 0 ;;
@@ -163,12 +166,12 @@ case "$cmd" in
     elif [ "$want_recent" = 1 ]; then
       session=$(recent_session)
       if [ -z "$session" ]; then
-        echo "macmini 上还没有任何 tmux 会话，直接跑 macmini tmux 就会新建一个" >&2
+        echo "macmini 上还没有任何 tmux 会话，直接跑 macmini-tmux tmux 就会新建一个" >&2
         exit 1
       fi
     else
       session=$(next_name)                 # 不带参数：每次一个新会话
-      printf '→ macmini 新会话：%s（下次接回：macmini tmux -s %s，或 macmini tmux -a）\n' \
+      printf '→ 新会话：%s（下次接回：macmini-tmux tmux -s %s，或 macmini-tmux tmux -a）\n' \
         "$session" "$session" >&2
     fi
 

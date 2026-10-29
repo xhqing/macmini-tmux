@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.3.1-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.3.2-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [English](README.md)
@@ -29,15 +29,15 @@
 
 | 命令 | 做什么 |
 |---|---|
-| `macmini tmux` | 开一个**新会话**，名字自动取最小空闲号（`session#1`、`session#2` …）；进会话前会打印本次会话名 |
-| `macmini tmux -s dev` | 接上名为 `dev` 的会话；没有就新建（断线重连、固定工作区用这条） |
-| `macmini tmux dev` | 同上，省略 `-s` |
-| `macmini tmux -a` | 接回**最近一次进去过**的会话 |
-| `macmini tmux -l` | 列出 macmini 上现有的 tmux 会话 |
-| `macmini df -h` | 不碰 tmux，直接把命令透传到 macmini 执行 |
-| `macmini --version` | 显示当前安装的版本号（也可写 `macmini-tmux --version`） |
-| `macmini --update` | 从本地仓库拉取最新版并重新安装 |
-| `macmini -h` | 显示帮助 |
+| `macmini-tmux tmux` | 开一个**新会话**，名字自动取最小空闲号（`session#1`、`session#2` …）；进会话前会打印本次会话名 |
+| `macmini-tmux tmux -s dev` | 接上名为 `dev` 的会话；没有就新建（断线重连、固定工作区用这条） |
+| `macmini-tmux tmux dev` | 同上，省略 `-s` |
+| `macmini-tmux tmux -a` | 接回**最近一次进去过**的会话 |
+| `macmini-tmux tmux -l` | 列出 macmini 上现有的 tmux 会话 |
+| `macmini-tmux df -h` | 不碰 tmux，直接把命令透传到 macmini 执行 |
+| `macmini-tmux --version` | 显示当前安装的版本号（短别名 `macmini --version` 等价） |
+| `macmini-tmux --update` | 从本地仓库拉取最新版并重新安装 |
+| `macmini-tmux -h` | 显示帮助 |
 
 会话名里带 `#` 是合法的，本机 tmux 3.6b 与 macmini tmux 3.3a 上都实测可用。
 
@@ -49,9 +49,9 @@ cd macmini-tmux
 ./install.sh
 ```
 
-脚本把 `macmini` 复制到 `~/.local/bin/macmini`（`BIN_DIR=/usr/local/bin ./install.sh` 可以换位置），并额外装一个指向它的 `macmini-tmux`，两个名字用法完全相同。这是**复制**不是软链接：日常用的一定是部署出去的那份，改仓库里的脚本要重新 `install.sh` 才生效——开发中的版本不会意外影响正在用的命令。
+脚本在 `~/.local/bin/` 下部署**两份真实副本**：`macmini-tmux`（主名）和短别名 `macmini`，两个名字用法完全一致，删掉其中一个不影响另一个（不是软链接）。想换位置用 `BIN_DIR=/usr/local/bin ./install.sh`。这是**复制**不是软链接：日常用的一定是部署出去的那份，改仓库里的脚本要重新 `install.sh` 才生效——开发中的版本不会意外影响正在用的命令。
 
-想升级就直接跑 `macmini --update`：它会对你本地仓库执行 `git pull --ff-only` 再重装一遍（仓库不在默认位置时用 `MACMINI_REPO=<路径>` 指定）。安装脚本会把脚本内的版本号与仓库根 `VERSION` 文件比对，不一致就拒绝安装，避免两处漂移。
+想升级就直接跑 `macmini-tmux --update`：它会对你本地仓库执行 `git pull --ff-only` 再重装一遍（仓库不在默认位置时用 `MACMINI_REPO=<路径>` 指定）。安装脚本会把脚本内的版本号与仓库根 `VERSION` 文件比对，不一致就拒绝安装，避免两处漂移。
 
 ## 编号规则
 

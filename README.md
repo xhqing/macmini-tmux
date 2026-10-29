@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.3.1-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.3.2-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [简体中文](README_cn.md)
@@ -29,15 +29,15 @@ Under the hood the transport is **et (Eternal Terminal)** rather than plain ssh:
 
 | Command | What it does |
 |---|---|
-| `macmini tmux` | Start a **new session** with the smallest free number (`session#1`, `session#2`, …); the chosen name is printed before attaching |
-| `macmini tmux -s dev` | Attach to `dev`; create it if missing (use this to reconnect, or for a fixed workspace) |
-| `macmini tmux dev` | Same as above, with `-s` omitted |
-| `macmini tmux -a` | Attach to the session you **entered most recently** |
-| `macmini tmux -l` | List the tmux sessions on the Mac mini |
-| `macmini df -h` | Skip tmux entirely and run the command on the Mac mini |
-| `macmini --version` | Print the installed version (also available as `macmini-tmux --version`) |
-| `macmini --update` | Pull the latest version from the local clone and reinstall |
-| `macmini -h` | Show help |
+| `macmini-tmux tmux` | Start a **new session** with the smallest free number (`session#1`, `session#2`, …); the chosen name is printed before attaching |
+| `macmini-tmux tmux -s dev` | Attach to `dev`; create it if missing (use this to reconnect, or for a fixed workspace) |
+| `macmini-tmux tmux dev` | Same as above, with `-s` omitted |
+| `macmini-tmux tmux -a` | Attach to the session you **entered most recently** |
+| `macmini-tmux tmux -l` | List the tmux sessions on the Mac mini |
+| `macmini-tmux df -h` | Skip tmux entirely and run the command on the Mac mini |
+| `macmini-tmux --version` | Print the installed version (the short alias `macmini --version` works too) |
+| `macmini-tmux --update` | Pull the latest version from the local clone and reinstall |
+| `macmini-tmux -h` | Show help |
 
 A `#` inside a session name is perfectly legal — verified on tmux 3.6b locally and tmux 3.3a on the Mac mini.
 
@@ -49,9 +49,9 @@ cd macmini-tmux
 ./install.sh
 ```
 
-The script copies `macmini` to `~/.local/bin/macmini` (`BIN_DIR=/usr/local/bin ./install.sh` installs elsewhere) and adds a `macmini-tmux` name pointing at it, so both spellings work. It is a **copy, not a symlink**: what you run day to day is the deployed copy, so edits in the repo take effect only after re-running `install.sh`. Work in progress never changes the command you rely on.
+The script deploys **two real copies** into `~/.local/bin/`: `macmini-tmux` (the primary name) and the short alias `macmini`. Both spellings work identically, and removing one does not affect the other (they are not symlinks). Use `BIN_DIR=/usr/local/bin ./install.sh` to install elsewhere. It is a **copy, not a symlink**: what you run day to day is the deployed copy, so edits in the repo take effect only after re-running `install.sh`. Work in progress never changes the command you rely on.
 
-To upgrade, run `macmini --update`: it does a `git pull --ff-only` in your local clone and reinstalls (point it elsewhere with `MACMINI_REPO=<path>`). The installer compares the version baked into the script against the repo's `VERSION` file and refuses to install on a mismatch, so the two can never drift apart.
+To upgrade, run `macmini-tmux --update`: it does a `git pull --ff-only` in your local clone and reinstalls (point it elsewhere with `MACMINI_REPO=<path>`). The installer compares the version baked into the script against the repo's `VERSION` file and refuses to install on a mismatch, so the two can never drift apart.
 
 ## Numbering rules
 

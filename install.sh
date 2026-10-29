@@ -5,8 +5,8 @@
 # 用复制而不是软链接：开发目录与运行版本隔离，改动要重新 install 才生效
 # （与团队里 codef 等工具的部署方式一致）。
 #
-# 同时装一个 macmini-tmux 名字（指向同一个脚本），这样 `macmini-tmux --version`
-# 这类按项目名写的命令也能用。
+# 同时部署两个真实副本：主名 macmini-tmux（推荐，见名知用途）+ 短别名 macmini。
+# 两者都是独立文件而不是软链接：删掉/替换其中一个不会影响另一个。
 #
 # 想装到别处：BIN_DIR=/usr/local/bin ./install.sh
 set -euo pipefail
@@ -26,16 +26,17 @@ if [ -z "$script_ver" ] || [ -z "$file_ver" ] || [ "$script_ver" != "$file_ver" 
   exit 1
 fi
 
-echo "==> 部署 macmini 命令（v${script_ver}）"
+echo "==> 部署命令（v${script_ver}）"
 mkdir -p "$BIN_DIR"
+# 两个都装成真实的脚本副本（不是软链接）：任一文件被删/被替换都不影响另一个
+install -m 755 "$ROOT/macmini" "$BIN_DIR/macmini-tmux"
 install -m 755 "$ROOT/macmini" "$BIN_DIR/macmini"
-ln -sf "$BIN_DIR/macmini" "$BIN_DIR/macmini-tmux"
-echo "    已部署：$BIN_DIR/macmini"
-echo "    已链接：$BIN_DIR/macmini-tmux -> macmini"
+echo "    已部署：$BIN_DIR/macmini-tmux（主名，推荐用这个）"
+echo "    已部署：$BIN_DIR/macmini（短别名，同一脚本的副本）"
 
 echo
-if ! command -v macmini >/dev/null 2>&1; then
+if ! command -v macmini-tmux >/dev/null 2>&1; then
   echo "提醒：$BIN_DIR 不在 PATH 里，把下面这行加到 ~/.zshrc 后再试："
   echo "    export PATH=\"$BIN_DIR:\$PATH\""
 fi
-echo "完成。试试：macmini tmux（查版本：macmini --version）"
+echo "完成。试试：macmini-tmux tmux（查版本：macmini-tmux --version）"
