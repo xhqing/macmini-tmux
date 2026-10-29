@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.1.0-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.2.0-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [English](README.md)
@@ -20,6 +20,10 @@
 - 二是 `ssh -t` 不能省。少写 `-t` 就没终端，tmux 直接报 `open terminal failed`，而这个错对不熟悉 tmux 的人来说很难一眼看明白。
 
 `macmini-tmux` 把这两件事包成一条命令：不带参数就是「开一个新的」，会话名由脚本按 `session#1`、`session#2` 递增分配，你什么都不用记；要接回旧会话时再按名字或「最近的」去接。
+
+传输层用的是 **et（Eternal Terminal）**，不是 ssh：et 会把按键**先在本地显示、再异步同步给远端**，所以网络延迟和抖动不会变成打字卡顿；断网或换网络后也会自动重连。tmux 仍然在远端跑，负责会话持久化、分屏、状态栏这些体验——两边的长处都拿到了。**对使用者来说命令完全没变**，et 封装在脚本内部：
+
+- 本机没装 `et`，或者你是在 tmux 里跑这条命令（et 在 tmux 内不可用），脚本会自动回退到 ssh，行为与旧版一致。
 
 ## 用法
 
@@ -88,6 +92,7 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 
 - macOS（脚本用 bash 与 `ssh -t`，tmux 本身跨平台但不做 Windows 适配）
 - 目标机器装好 tmux
+- 想要 et 带来的「本地回显、断线重连」体验：本机与目标机器都装 `et`（本机 `brew install et`；目标机器可用 brew 或从源码编译），并在目标机器上把 `etserver` 跑起来（默认端口 2022）。没装也能用，脚本会自动走 ssh
 - ssh 已配置免密登录（推荐 `~/.ssh/config` 里设 `Host mac-mini` + 密钥）
 - 建议在目标机器或本机 `~/.tmux.conf` 里加大 `status-left-length`，免得会话名被截断
 

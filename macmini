@@ -11,7 +11,13 @@
 #   macmini -h                显示本帮助
 #
 # 背景：
-#   * ssh 的 -t 负责分配终端，tmux 没有终端会报 "open terminal failed"。
+#   * 传输层用 et（Eternal Terminal）而不是 ssh：et 有**本地回显**——按键先在本地显示、
+#     再异步同步给远端，所以 40ms 延迟、250ms 尖峰都不会变成打字卡顿；断网 / 换网络
+#     还会自动重连。tmux 仍然在远端跑，负责会话持久化、分屏、状态栏等体验。
+#   * et 的 `--name` 每次都新建会话（同名也不接），所以要「先试 --attach 接回、失败再 --name 新建」。
+#   * et 在 **本机 tmux 内不可用**（macOS 26 上会报 No route to host，原因未定位），
+#     检测到 $TMUX 时自动回退到 ssh，保证在 tmux 里跑这条命令也能用。
+#   * ssh 的 -t 负责分配终端，tmux 没有终端会报 "open terminal failed"（回退路径仍需要）。
 #   * 远端的 -A 是 tmux 的「有就接上、没有就新建」，所以指定名字时一条命令兼顾首次进入与断线重连。
 #   * 不带 -s 时不做「接回」，每次都是新会话：会话名按 session#1、session#2 递增，不用起名也不会撞名。
 #   * 会话名里的 # 已经实测可用（本机 tmux 3.6b / macmini tmux 3.3a），不是特殊字符。
@@ -19,6 +25,7 @@
 set -u
 
 HOST="${MACMINI_HOST:-mac-mini}"        # 换机器 / 换别名时用环境变量覆盖，如 MACMINI_HOST=mac-mini-lan macmini tmux
+ET_USER="${MACMINI_ET_USER:-mac}"       # et 登录用的用户名（et 要写成 user@host）
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
 
 usage() {
@@ -51,6 +58,33 @@ recent_session() {
     | sort -rn \
     | head -1 \
     | cut -f2-
+}
+
+# 连上某个 tmux 会话（et 优先；在 tmux 里或 et 不存在时回退 ssh）
+# et 的 --attach 失败时会把提示打到 stdout 且无法静默，所以会产生一行「No saved session」——
+# 只会出现在「该 et 会话还不存在」（即首次连接 / 会话已过期）的时候，随后立刻正常连上。
+connect() {
+  local name="$1"
+  local remote_cmd="exec tmux attach -t '$name'"
+
+  # 关键：用 ssh 先在后台把 tmux 会话建好（已存在就忽略报错）。
+  # 不能把 `tmux new-session -d` 放在 et 的远端命令里——et 断开时会把它的进程树一起收走，
+  # 实测导致 tmux 会话跟着消失。用 ssh 建好后，会话生命周期就与 et 无关，断线重连才能真正接回。
+  ssh "$HOST" "tmux new-session -d -s '$name' 2>/dev/null; true" >/dev/null 2>&1
+
+  # et 在本机 tmux 内不可用（macOS 26 兼容问题），直接用 ssh
+  if [ -n "${TMUX:-}" ]; then
+    exec ssh -t "$HOST" "$remote_cmd"
+  fi
+
+  if command -v et >/dev/null 2>&1; then
+    # 先试接回已有 et 会话；没有就新建一个（远端只负责 attach，会话已由上面的 ssh 建好）
+    et --attach "$name" || exec et --name "$name" "${ET_USER}@${HOST}" "$remote_cmd"
+    exit 0
+  fi
+
+  # 没装 et：回退到原来的 ssh 行为
+  exec ssh -t "$HOST" "$remote_cmd"
 }
 
 cmd="${1:-}"
@@ -96,7 +130,7 @@ case "$cmd" in
         "$session" "$session" >&2
     fi
 
-    exec ssh -t "$HOST" "tmux new -A -s '$session'"
+    connect "$session"
     ;;
   ""|-h|--help) usage 0 ;;
   *)

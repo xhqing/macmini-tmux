@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.1.0-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.2.0-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [简体中文](README_cn.md)
@@ -20,6 +20,10 @@ When the Mac mini doubles as a remote dev box, the routine step is "get in and o
 - `ssh -t` is easy to forget. Without `-t` there is no tty, and tmux dies with `open terminal failed` — a message that means little if you rarely use tmux.
 
 `macmini-tmux` folds both into one command: no arguments means "start a fresh one", and the script hands out the next free number (`session#1`, `session#2`, …) so there is no name to remember. To go back to an older session, attach it by name or just take the most recent one.
+
+Under the hood the transport is **et (Eternal Terminal)** rather than plain ssh: et renders your keystrokes **locally first** and syncs them to the remote asynchronously, so network latency and jitter never turn into typing lag, and it reconnects by itself after a drop or a network switch. tmux still runs on the remote side and keeps doing what it is good at — session persistence, splits, status bar. **Your commands do not change at all**; et is wrapped inside the script:
+
+- If `et` is not installed, or you run this command from inside tmux (et does not work there), the script falls back to ssh automatically and behaves exactly like the previous version.
 
 ## Usage
 
@@ -88,6 +92,7 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 
 - macOS (the script relies on bash and `ssh -t`; tmux itself is cross-platform, but Windows is not handled)
 - tmux installed on the target machine
+- For the et experience (local echo, reconnect after a drop): install `et` on both ends (`brew install et` locally; brew or a source build on the target) and run `etserver` on the target (port 2022 by default). Without it the script simply uses ssh
 - passwordless SSH (a `Host mac-mini` entry plus a key in `~/.ssh/config` is the tidy way)
 - a larger `status-left-length` in `~/.tmux.conf` on either side, so session names are not truncated
 
