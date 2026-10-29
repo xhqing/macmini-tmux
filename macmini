@@ -2,18 +2,18 @@
 # macmini-tmux —— 操作 macmini 的统一入口
 #
 # 用法：
-#   macmini-tmux tmux          每次开一个新会话，名字自动递增（session#1、session#2 …）
-#   macmini-tmux tmux -s <名> 接上该名字的会话；没有就新建（断线重连用这条）
-#   macmini-tmux tmux <名字>  同上，省略 -s 的写法
-#   macmini-tmux tmux -a      接回最近一次进去过的会话（按最后一次 attach 的时间算）
-#   macmini-tmux tmux -l      列出 macmini 上现有的 tmux 会话
-#   macmini-tmux <命令...>    直接把命令透传到 macmini 执行，例如 macmini-tmux df -h
+#   macmini-tmux              每次开一个新会话，名字自动递增（session#1、session#2 …）
+#   macmini-tmux -s <名>      接上该名字的会话；没有就新建（断线重连用这条）
+#   macmini-tmux -a           接回最近一次进去过的会话（按最后一次 attach 的时间算）
+#   macmini-tmux -l           列出 macmini 上现有的 tmux 会话
+#   macmini-tmux <命令...>    把命令透传到 macmini 执行，例如 macmini-tmux df -h
 #   macmini-tmux --version    显示当前安装的版本号
 #   macmini-tmux --update     从本地仓库拉取最新版并重新安装
 #   macmini-tmux -h           显示本帮助
 #
 #   （`macmini` 是同一脚本的短别名副本，两个名字用法完全一样；
-#     涉及 --version / --update 这类含义不清的写法时，推荐用 macmini-tmux）
+#     涉及 --version / --update 这类含义不清的写法时，推荐用 macmini-tmux。
+#     旧写法 `macmini-tmux tmux ...` 仍可用，等价于省略中间那个 tmux。）
 #
 # 背景：
 #   * 传输层用 et（Eternal Terminal）而不是 ssh：et 有**本地回显**——按键先在本地显示、
@@ -35,7 +35,7 @@ REPO="${MACMINI_REPO:-$HOME/Developer/macmini-tmux}"   # --update 用的本地�
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
 
 # 版本号：与仓库根 VERSION 文件必须一致（install.sh 会校验，不一致就拒绝安装）
-VERSION="0.3.2"
+VERSION="0.3.3"
 
 usage() {
   awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
@@ -135,8 +135,10 @@ case "$cmd" in
 esac
 
 case "$cmd" in
-  tmux)
-    shift            # 去掉子命令名，后面才是 tmux 自己的参数
+  ""|tmux|-s|--session|-a|--attach|-l|--list|-h|--help)
+    # tmux 子命令可以省略：macmini-tmux / macmini-tmux -s dev 直接可用。
+    # 旧写法 macmini-tmux tmux ... 仍然支持（等价）。
+    [ "$cmd" = "tmux" ] && shift
     session=""
     want_recent=0
     while [ $# -gt 0 ]; do

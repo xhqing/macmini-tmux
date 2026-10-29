@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3] - 2026-10-29
+
+### 变更（去掉重复的 `tmux` 子命令）
+
+- **为什么改**：命令名已经是 `macmini-tmux`，再跟一个 `tmux` 子命令（`macmini-tmux tmux -s dev`）读起来重复，用户直接指出不简洁。
+- **改了什么**：`tmux` 子命令改为**可省略**——`macmini-tmux`、`macmini-tmux -s dev`、`macmini-tmux -l` 直接可用；旧写法 `macmini-tmux tmux ...` 保留兼容，行为完全一致。帮助里也不再重复出现两次 `tmux`。
+- **验证**：新写法 `-l`、旧写法 `tmux -l`、透传 `df -h`、帮助输出全部正常。
+
 ## [0.3.2] - 2026-10-29
 
 ### 变更（`macmini-tmux` 改为真实副本 + 主推项目名）

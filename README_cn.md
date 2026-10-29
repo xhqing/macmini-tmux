@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.3.2-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.3.3-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [English](README.md)
@@ -29,11 +29,11 @@
 
 | 命令 | 做什么 |
 |---|---|
-| `macmini-tmux tmux` | 开一个**新会话**，名字自动取最小空闲号（`session#1`、`session#2` …）；进会话前会打印本次会话名 |
-| `macmini-tmux tmux -s dev` | 接上名为 `dev` 的会话；没有就新建（断线重连、固定工作区用这条） |
-| `macmini-tmux tmux dev` | 同上，省略 `-s` |
-| `macmini-tmux tmux -a` | 接回**最近一次进去过**的会话 |
-| `macmini-tmux tmux -l` | 列出 macmini 上现有的 tmux 会话 |
+| `macmini-tmux` | 开一个**新会话**，名字自动取最小空闲号（`session#1`、`session#2` …）；进会话前会打印本次会话名 |
+| `macmini-tmux -s dev` | 接上名为 `dev` 的会话；没有就新建（断线重连、固定工作区用这条） |
+| `macmini-tmux -s dev` | 同上，省略 `-s` |
+| `macmini-tmux -a` | 接回**最近一次进去过**的会话 |
+| `macmini-tmux -l` | 列出 macmini 上现有的 tmux 会话 |
 | `macmini-tmux df -h` | 不碰 tmux，直接把命令透传到 macmini 执行 |
 | `macmini-tmux --version` | 显示当前安装的版本号（短别名 `macmini --version` 等价） |
 | `macmini-tmux --update` | 从本地仓库拉取最新版并重新安装 |
