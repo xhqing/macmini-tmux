@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="200" viewBox="0 0 640 200" role="img" aria-label="macmini-tmux — numbered tmux sessions on the Mac mini">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1F2937"/>
+      <stop offset="100%" stop-color="#0B1220"/>
+    </linearGradient>
+    <linearGradient id="pane" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ADE80"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="200" rx="28" fill="url(#bg)"/>
+
+  <!-- 三层错位的终端窗口：表示一台上叠着多个会话 -->
+  <rect x="52" y="86" width="86" height="58" rx="10" fill="#111C2E" stroke="#33506B" stroke-width="2"/>
+  <rect x="66" y="72" width="86" height="58" rx="10" fill="#16233A" stroke="#3C6185" stroke-width="2"/>
+  <rect x="80" y="58" width="86" height="58" rx="10" fill="#1B2B45" stroke="url(#pane)" stroke-width="2.5"/>
+  <rect x="80" y="58" width="86" height="16" rx="8" fill="url(#pane)" opacity="0.28"/>
+  <circle cx="92" cy="66" r="3" fill="#4ADE80"/>
+  <circle cx="102" cy="66" r="3" fill="#FBBF24"/>
+  <circle cx="112" cy="66" r="3" fill="#22D3EE"/>
+  <text x="90" y="104" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="url(#pane)">#1</text>
+
+  <text x="196" y="92" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#FFFFFF">macmini-tmux</text>
+  <text x="196" y="124" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#8FA9C4">Numbered tmux sessions on the Mac mini</text>
+</svg>

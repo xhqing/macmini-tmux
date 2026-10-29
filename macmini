@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# macmini —— 操作 macmini 的统一入口
+#
+# 用法：
+#   macmini tmux              每次开一个新会话，名字自动递增（session#1、session#2 …）
+#   macmini tmux -s <名字>    接上该名字的会话；没有就新建（断线重连用这条）
+#   macmini tmux <名字>       同上，省略 -s 的写法
+#   macmini tmux -a           接回最近一次进去过的会话（按最后一次 attach 的时间算）
+#   macmini tmux -l           列出 macmini 上现有的 tmux 会话
+#   macmini <其它命令...>     直接在 macmini 上跑（带终端），例如 macmini df -h
+#   macmini -h                显示本帮助
+#
+# 背景：
+#   * ssh 的 -t 负责分配终端，tmux 没有终端会报 "open terminal failed"。
+#   * 远端的 -A 是 tmux 的「有就接上、没有就新建」，所以指定名字时一条命令兼顾首次进入与断线重连。
+#   * 不带 -s 时不做「接回」，每次都是新会话：会话名按 session#1、session#2 递增，不用起名也不会撞名。
+#   * 会话名里的 # 已经实测可用（本机 tmux 3.6b / macmini tmux 3.3a），不是特殊字符。
+#   * macmini 已装好 Ghostty 的 terminfo，TERM=xterm-ghostty 不会再报 missing terminal。
+set -u
+
+HOST="${MACMINI_HOST:-mac-mini}"        # 换机器 / 换别名时用环境变量覆盖，如 MACMINI_HOST=mac-mini-lan macmini tmux
+PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
+
+usage() {
+  awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
+  exit "${1:-0}"
+}
+
+# 列出 macmini 上的会话名（一个也没有时输出为空）
+remote_sessions() {
+  ssh "$HOST" "tmux ls -F '#{session_name}'" 2>/dev/null
+}
+
+# 算下一个没被占用的名字：从 session#1 开始找，遇到缺口就用那个号
+# （比如已有 session#1、session#3，就返回 session#2；删掉的号会被重新利用）
+next_name() {
+  local n
+  n=$(remote_sessions \
+        | sed -n "s/^${PREFIX}#\([0-9][0-9]*\)\$/\\1/p" \
+        | sort -n \
+        | awk 'BEGIN { n = 1 } $1 + 0 == n { n++ } END { print n }')
+  printf '%s#%s\n' "$PREFIX" "${n:-1}"
+}
+
+# 找「最近一次进去过」的会话：优先看 session_last_attached（最后一次 attach 的时间，
+# 也就是你最近一次进这个会话的时刻），从没 attach 过的（-d 在后台建的）才退而看 session_activity
+# 注意：会话名里不要用 | 和制表符，否则这里解析会乱
+recent_session() {
+  ssh "$HOST" "tmux ls -F '#{session_last_attached}|#{session_activity}|#{session_name}'" 2>/dev/null \
+    | awk -F'|' 'NF == 3 { print (($1 + 0) > 0 ? $1 : $2) "\t" $3 }' \
+    | sort -rn \
+    | head -1 \
+    | cut -f2-
+}
+
+cmd="${1:-}"
+
+case "$cmd" in
+  tmux)
+    shift            # 去掉子命令名，后面才是 tmux 自己的参数
+    session=""
+    want_recent=0
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        -s|--session)
+          session="${2:?-s 后面要跟会话名}"
+          shift 2
+          ;;
+        -a|--attach)
+          want_recent=1
+          shift
+          ;;
+        -l|--list)
+          ssh -t "$HOST" 'tmux ls' 2>/dev/null || echo "（macmini 上还没有任何 tmux 会话，直接 macmini tmux 就会新建一个）"
+          exit $?
+          ;;
+        -h|--help) usage 0 ;;
+        *)
+          session="$1"      # 允许省略 -s：macmini tmux dev
+          shift
+          ;;
+      esac
+    done
+
+    if [ -n "$session" ]; then
+      :                                    # 点名了就接上或新建，不改名字
+    elif [ "$want_recent" = 1 ]; then
+      session=$(recent_session)
+      if [ -z "$session" ]; then
+        echo "macmini 上还没有任何 tmux 会话，直接跑 macmini tmux 就会新建一个" >&2
+        exit 1
+      fi
+    else
+      session=$(next_name)                 # 不带参数：每次一个新会话
+      printf '→ macmini 新会话：%s（下次接回：macmini tmux -s %s，或 macmini tmux -a）\n' \
+        "$session" "$session" >&2
+    fi
+
+    exec ssh -t "$HOST" "tmux new -A -s '$session'"
+    ;;
+  ""|-h|--help) usage 0 ;;
+  *)
+    # 其它命令整体透传到 macmini 执行（$@ 含 cmd 本身，不能再 shift 掉）
+    if [ -t 0 ]; then exec ssh -t "$HOST" "$@"; else exec ssh "$HOST" "$@"; fi
+    ;;
+esac
