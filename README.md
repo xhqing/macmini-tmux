@@ -94,3 +94,9 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 ## Related
 
 This repository is a subproject of [ExecutiveAssistantAgent](https://github.com/xhqing/ExecutiveAssistantAgent) (Kit). The `AGENTS.md` and `.pi` entries at the repo root are symlinks back to that agent project, so a session opened in this directory inherits the same rules and skills.
+
+## License & Attribution
+
+Copyright (c) 2026 All Contributors. Released under the [MIT License](LICENSE.md).
+
+Attribution: if you use or reference this project, please keep the copyright notice and credit the source: [macmini-tmux](https://github.com/xhqing/macmini-tmux).

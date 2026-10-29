@@ -94,3 +94,9 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 ## 相关
 
 本仓库是 [ExecutiveAssistantAgent](https://github.com/xhqing/ExecutiveAssistantAgent)（Kit）的子项目。仓库根目录的 `AGENTS.md` 与 `.pi` 是指回该 Agent 项目的软链接，用于在子项目目录开会话时继承同一套规则与技能。
+
+## 许可证与署名
+
+Copyright (c) 2026 All Contributors。基于 [MIT License](LICENSE.md) 发布。
+
+署名：使用或引用本项目时，请保留版权声明并注明来源：[macmini-tmux](https://github.com/xhqing/macmini-tmux)。
