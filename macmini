@@ -8,6 +8,8 @@
 #   macmini tmux -a           接回最近一次进去过的会话（按最后一次 attach 的时间算）
 #   macmini tmux -l           列出 macmini 上现有的 tmux 会话
 #   macmini <其它命令...>     直接在 macmini 上跑（带终端），例如 macmini df -h
+#   macmini --version         显示当前安装的版本号
+#   macmini --update          从本地仓库拉取最新版并重新安装
 #   macmini -h                显示本帮助
 #
 # 背景：
@@ -26,7 +28,11 @@ set -u
 
 HOST="${MACMINI_HOST:-mac-mini}"        # 换机器 / 换别名时用环境变量覆盖，如 MACMINI_HOST=mac-mini-lan macmini tmux
 ET_USER="${MACMINI_ET_USER:-mac}"       # et 登录用的用户名（et 要写成 user@host）
+REPO="${MACMINI_REPO:-$HOME/Developer/macmini-tmux}"   # --update 用的本地仓库路径
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
+
+# 版本号：与仓库根 VERSION 文件必须一致（install.sh 会校验，不一致就拒绝安装）
+VERSION="0.3.0"
 
 usage() {
   awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
@@ -87,7 +93,40 @@ connect() {
   exec ssh -t "$HOST" "$remote_cmd"
 }
 
+# 从本地仓库拉最新版并重新安装
+update_self() {
+  if [ ! -d "$REPO/.git" ]; then
+    echo "找不到本地仓库：$REPO" >&2
+    echo "用 MACMINI_REPO=<仓库路径> 指定位置，或先手动 clone：" >&2
+    echo "    git clone git@github.com:xhqing/macmini-tmux.git ~/Developer/macmini-tmux" >&2
+    exit 1
+  fi
+
+  echo "==> 更新仓库：$REPO"
+  if ! git -C "$REPO" pull --ff-only; then
+    echo "拉取失败：可能有本地未提交改动、或当前不在可快进的提交上" >&2
+    echo "先去仓库里处理干净（git status）再重试" >&2
+    exit 1
+  fi
+
+  "$REPO/install.sh"
+  echo
+  echo "==> 当前版本：$("$REPO/macmini" --version)"
+}
+
 cmd="${1:-}"
+
+# 版本查询与自更新先于其余分支处理，避免被当成「透传到 macmini 的命令」
+case "$cmd" in
+  --version|-V)
+    printf 'macmini-tmux %s\n' "$VERSION"
+    exit 0
+    ;;
+  --update)
+    update_self
+    exit 0
+    ;;
+esac
 
 case "$cmd" in
   tmux)

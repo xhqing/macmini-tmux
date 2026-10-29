@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="macmini-tmux" width="640">
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE.md)
-  [![Version](https://img.shields.io/badge/Version-0.2.0-blue)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/Version-0.3.0-blue)](CHANGELOG.md)
   [![Type](https://img.shields.io/badge/Type-CLI%20Tool-0D9488)](#)
 
   [简体中文](README_cn.md)
@@ -35,6 +35,8 @@ Under the hood the transport is **et (Eternal Terminal)** rather than plain ssh:
 | `macmini tmux -a` | Attach to the session you **entered most recently** |
 | `macmini tmux -l` | List the tmux sessions on the Mac mini |
 | `macmini df -h` | Skip tmux entirely and run the command on the Mac mini |
+| `macmini --version` | Print the installed version (also available as `macmini-tmux --version`) |
+| `macmini --update` | Pull the latest version from the local clone and reinstall |
 | `macmini -h` | Show help |
 
 A `#` inside a session name is perfectly legal — verified on tmux 3.6b locally and tmux 3.3a on the Mac mini.
@@ -47,7 +49,9 @@ cd macmini-tmux
 ./install.sh
 ```
 
-The script copies `macmini` to `~/.local/bin/macmini` (`BIN_DIR=/usr/local/bin ./install.sh` installs elsewhere). It is a **copy, not a symlink**: what you run day to day is the deployed copy, so edits in the repo take effect only after re-running `install.sh`. Work in progress never changes the command you rely on.
+The script copies `macmini` to `~/.local/bin/macmini` (`BIN_DIR=/usr/local/bin ./install.sh` installs elsewhere) and adds a `macmini-tmux` name pointing at it, so both spellings work. It is a **copy, not a symlink**: what you run day to day is the deployed copy, so edits in the repo take effect only after re-running `install.sh`. Work in progress never changes the command you rely on.
+
+To upgrade, run `macmini --update`: it does a `git pull --ff-only` in your local clone and reinstalls (point it elsewhere with `MACMINI_REPO=<path>`). The installer compares the version baked into the script against the repo's `VERSION` file and refuses to install on a mismatch, so the two can never drift apart.
 
 ## Numbering rules
 
