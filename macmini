@@ -25,6 +25,11 @@
 #   * ssh 的 -t 负责分配终端，tmux 没有终端会报 "open terminal failed"（回退路径仍需要）。
 #   * 远端的 -A 是 tmux 的「有就接上、没有就新建」，所以指定名字时一条命令兼顾首次进入与断线重连。
 #   * 不带 -s 时不做「接回」，每次都是新会话：会话名按 session#1、session#2 递增，不用起名也不会撞名。
+#   * **新建会话默认落在本机当前目录对应的 macmini 路径**：两机 ~/Developer 是 syncthing 全量镜像、
+#     目录结构一致，只差 home（本机 /Users/xhq → macmini /Users/mac）。所以在 ~/Developer/x 下跑
+#     macmini-tmux，远端会话直接开在 ~/Developer/x，省得每次手动 cd。
+#     本机 cwd 不在 home 下（/tmp 之类）或远端对应目录不存在时，回落为远端 $HOME。
+#     想强制指定：MACMINI_CWD=/some/abs/path macmini-tmux。
 #   * 会话名里的 # 已经实测可用（本机 tmux 3.6b / macmini tmux 3.3a），不是特殊字符。
 #   * macmini 已装好 Ghostty 的 terminfo，TERM=xterm-ghostty 不会再报 missing terminal。
 set -u
@@ -35,7 +40,7 @@ REPO="${MACMINI_REPO:-$HOME/Developer/macmini-tmux}"   # --update 用的本地�
 PREFIX="session"        # 自动编号会话的前缀，最终名字形如 session#3
 
 # 版本号：与仓库根 VERSION 文件必须一致（install.sh 会校验，不一致就拒绝安装）
-VERSION="0.3.3"
+VERSION="0.3.4"
 
 usage() {
   awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"
@@ -69,18 +74,34 @@ recent_session() {
     | cut -f2-
 }
 
+# 把本机 cwd 换算成「相对远端 $HOME 的子路径」，供新建会话时指定起始目录
+# 返回空字符串 = 不指定（远端用 $HOME）。
+# 两机目录结构一致，所以只需把本机 $HOME 前缀去掉：
+#   /Users/xhq/Developer/foo  ->  /Developer/foo  ->  远端 $HOME/Developer/foo
+remote_sub_for_cwd() {
+  local dir="${MACMINI_CWD:-$PWD}"
+  case "$dir" in
+    "$HOME")   printf '%s' "" ;;
+    "$HOME"/*) printf '%s' "${dir#"$HOME"}" ;;
+    *)         printf '%s' "" ;;   # 不在 home 下：不给远端指定，用它的 $HOME
+  esac
+}
+
 # 连上某个 tmux 会话（et 优先；在 tmux 里或 et 不存在时回退 ssh）
+# 第二个参数是相对于远端 $HOME 的子路径：会话是新建的才生效，已存在时 tmux 会忽略（duplicate session）
 connect() {
   local tmux_name="$1"
+  local remote_sub="${2-}"
   # et 的会话名不允许 # 和空格（会报 Invalid session name），把非法字符换成 -
   # （tmux 会话名本身不变，用户看到/使用的仍然是 session#1 这种）
   local et_name
   et_name=$(printf '%s' "$tmux_name" | tr '# :' '---')
 
-  # 关键：用 ssh 先在后台把 tmux 会话建好（已存在就忽略报错）。
+  # 用 ssh 先在后台把 tmux 会话建好（已存在就忽略报错）。
   # 不能把 `tmux new-session -d` 放在 et 的远端命令里——et 断开时会把它的进程树一起收走，
   # 实测导致 tmux 会话跟着消失。用 ssh 建好后，会话生命周期就与 et 无关，断线重连才能真正接回。
-  ssh "$HOST" "tmux new-session -d -s '$tmux_name' 2>/dev/null; true" >/dev/null 2>&1
+  # -c 指定起始目录：远端 $HOME + 本机换算出来的子路径；目录不存在则回落 $HOME。
+  ssh "$HOST" "d=\"\$HOME\"; [ -n \"$remote_sub\" ] && [ -d \"\$HOME$remote_sub\" ] && d=\"\$HOME$remote_sub\"; tmux new-session -d -s '$tmux_name' -c \"\$d\" 2>/dev/null; true" >/dev/null 2>&1
 
   # et 在本机 tmux 内不可用（macOS 26 兼容问题），直接用 ssh
   if [ -n "${TMUX:-}" ]; then
@@ -177,7 +198,7 @@ case "$cmd" in
         "$session" "$session" >&2
     fi
 
-    connect "$session"
+    connect "$session" "$(remote_sub_for_cwd)"
     ;;
   ""|-h|--help) usage 0 ;;
   *)

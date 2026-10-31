@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.4] - 2026-10-31
+
+### 新增（新建会话默认落在本机当前目录对应的 macmini 路径）
+
+- **为什么改**：用户用 cmux 侧栏看文件树时，看的是本机 `~/Developer` 的 syncthing 镜像副本；而 `macmini-tmux` 新建的会话默认停在远端 `$HOME`，两边目录对不上，侧栏跟终端永远不在同一个项目上。两机 `~/Developer` 是逐字节镜像、目录结构一致（只差 home：`/Users/xhq` → `/Users/mac`），所以完全可以把本机 cwd 直接映射过去。
+- **改了什么**：新建会话时用 `tmux new-session -c <远端目录>` 指定起始目录——取本机 `$PWD`、去掉本机 `$HOME` 前缀、拼到远端 `$HOME` 上。两种边界都回落远端 `$HOME`：本机 cwd 不在 home 下（`/tmp` 之类）、远端对应目录不存在（本机刚建还没同步过去）。新增 `MACMINI_CWD=<绝对路径>` 环境变量可强制指定。`-s` / `-a` 接回已有会话时行为不变（tmux 的 duplicate session 会忽略 `-c`）。
+- **验证**：本机 `~/Developer/ExecutiveAssistantAgent` → 远端 `/Users/mac/Developer/ExecutiveAssistantAgent`（用 `tmux display-message -p '#{pane_current_path}'` 实测）；`/tmp` 与「远端不存在的目录」两个边界都正确回落 `/Users/mac`。
+
 ## [0.3.3] - 2026-10-29
 
 ### 变更（去掉重复的 `tmux` 子命令）

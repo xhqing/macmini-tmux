@@ -41,6 +41,20 @@
 
 会话名里带 `#` 是合法的，本机 tmux 3.6b 与 macmini tmux 3.3a 上都实测可用。
 
+### 新建会话的起始目录
+
+两机的 `~/Developer` 是全量镜像、目录结构一致（只差 home：本机 `/Users/xhq` → macmini `/Users/mac`）。所以**新建会话默认落在本机当前目录对应的 macmini 路径**：
+
+```bash
+cd ~/Developer/ExecutiveAssistantAgent
+macmini-tmux          # 远端会话直接开在 ~/Developer/ExecutiveAssistantAgent
+```
+
+- 本机 cwd 不在 home 下（如 `/tmp`）→ 回落成远端 `$HOME`
+- 远端对应目录不存在（本机刚建、还没同步过去）→ 回落成远端 `$HOME`
+- 想强制指定：`MACMINI_CWD=/some/abs/path macmini-tmux`
+- `-s` / `-a` 接回已有会话时不改变它的目录（tmux 本来就这样）
+
 ## 安装
 
 ```bash

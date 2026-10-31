@@ -41,6 +41,20 @@ Under the hood the transport is **et (Eternal Terminal)** rather than plain ssh:
 
 A `#` inside a session name is perfectly legal — verified on tmux 3.6b locally and tmux 3.3a on the Mac mini.
 
+### Starting directory for new sessions
+
+Both machines keep `~/Developer` as a full mirror with identical layout — only the home differs (`/Users/xhq` → `/Users/mac`). So **a new session starts in the Mac mini path that corresponds to your current local directory**:
+
+```bash
+cd ~/Developer/ExecutiveAssistantAgent
+macmini-tmux          # the remote session opens in ~/Developer/ExecutiveAssistantAgent
+```
+
+- Local cwd outside home (e.g. `/tmp`) → falls back to the remote `$HOME`
+- Corresponding remote directory missing (created locally, not synced yet) → falls back to the remote `$HOME`
+- Force a specific path: `MACMINI_CWD=/some/abs/path macmini-tmux`
+- `-s` / `-a` reattach to existing sessions without changing their directory (tmux behavior)
+
 ## Install
 
 ```bash
