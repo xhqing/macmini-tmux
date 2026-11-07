@@ -6,6 +6,14 @@
 - **改了什么**（2026-11-03）：新增 `.github/workflows/validate.yml`（PR 与 main push 触发，检查名 `validate`）与 `.github/scripts/validate.py`（仓库卫生检查：必备文件存在、敏感文件未被跟踪、被跟踪文件不超过 10 MB、README 相对链接有效、Python / Shell 语法检查）；main 分支保护补挂 required check `validate` 并设 `strict=true`。
 - **边界**：检查只做确定性、低误报的项目（required check 一旦误报就会卡住正常 PR，所以宁可少查）；不改动仓库任何原有内容。
 
+## [未发布]
+
+### 新增（子项目专属规则文件 `.pi/APPEND_SYSTEM.md`）
+
+- **为什么改**：用户 2026-11-07 定下全局 Leader / Worker 分工——子项目的具体活由「以子项目根目录 / 子项目 worktree 为工作目录」的 Worker 会话干，而 pi 只加载 cwd 那一层的 `.pi/`（不向上继承）。子项目专属的硬规则没有别的地方可放：写进 Agent 项目的 `AGENTS.md` 既不会被 Worker 加载，也会污染其它兄弟子项目。
+- **改了什么**：新增 `.pi/APPEND_SYSTEM.md`（49 行），只写本项目特有的硬约束——部署方式（复制成真实副本、不软链）、版本号双处一致（脚本内 `VERSION=` 与 `VERSION` 文件，`install.sh` 不一致就拒装）、实测校验清单、不许破坏的八个既有行为（et 优先 + ssh 回退、`session#N` 自动编号、`-s` 的 `-A` 语义、`-a` 接回最近、新建会话落本机 cwd 对应路径与两种回落、旧写法兼容、`--update`、环境变量覆盖）、发布不带产物。全局规则与 Kit 身份仍来自仓库根 `AGENTS.md` 软链接，文件里不重述、不覆盖。
+- **影响**：纯新增规则文件，不改 `macmini` 脚本与 `install.sh`；不涉版本号（文档类改动不发版）。
+
 ## [0.3.4] - 2026-10-31
 
 ### 新增（新建会话默认落在本机当前目录对应的 macmini 路径）
