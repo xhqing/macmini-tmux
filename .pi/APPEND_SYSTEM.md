@@ -1,6 +1,6 @@
-# macmini-tmux · 项目专属硬规则
+# macmini-tmux · 项目硬约束
 
-本文件由 pi 在 cwd 位于本仓库（或其 worktree）时自动追加进系统提示。**只写本项目特有的约定**；全局规则与 Kit 的身份来自仓库根的 `AGENTS.md` 软链接，这里不复述、也不覆盖。
+身份与角色见本仓库根 `AGENTS.md`；团队通用规则见全局 `~/.pi/agent/AGENTS.md`，此处不重述。
 
 ## 这是什么
 
@@ -12,7 +12,7 @@
 ./install.sh    # 复制部署到 ~/.local/bin/macmini-tmux（主名）与 ~/.local/bin/macmini（短别名）
 ```
 
-两个部署目标都是**真实脚本副本、不是软链**——开发目录与运行版本隔离，改完必须重跑 `install.sh` 才生效；不要为了「改了立刻生效」把部署改成软链。
+身份与角色见本仓库根 `AGENTS.md`；团队通用规则见全局 `~/.pi/agent/AGENTS.md`，此处不重述。
 
 ## 版本号双处一致（硬性）
 
