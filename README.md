@@ -46,8 +46,8 @@ A `#` inside a session name is perfectly legal — verified on tmux 3.6b locally
 Both machines keep `~/Developer` as a full mirror with identical layout — only the home differs (`/Users/xhq` → `/Users/mac`). So **a new session starts in the Mac mini path that corresponds to your current local directory**:
 
 ```bash
-cd ~/Developer/ExecutiveAssistantAgent
-macmini-tmux          # the remote session opens in ~/Developer/ExecutiveAssistantAgent
+cd ~/Developer/assistant-agent
+macmini-tmux          # the remote session opens in ~/Developer/assistant-agent
 ```
 
 - Local cwd outside home (e.g. `/tmp`) → falls back to the remote `$HOME`
@@ -116,7 +116,7 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 
 ## Related
 
-This repository is a subproject of [ExecutiveAssistantAgent](https://github.com/xhqing/ExecutiveAssistantAgent) (Kit). The `AGENTS.md` and `.pi` entries at the repo root are symlinks back to that agent project, so a session opened in this directory inherits the same rules and skills.
+This repository is a subproject of [assistant-agent](https://github.com/xhqing/assistant-agent) (Kit). The `AGENTS.md` and `.pi` at the repo root are this repo's own files (project rules and tools) — the agent project and its subprojects have been fully independent since 2026-11-08.
 
 ## License & Attribution
 
