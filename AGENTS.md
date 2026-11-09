@@ -1,12 +1,12 @@
 # macmini-tmux
 
-> ExecutiveAssistantAgent（Kit）名下的子项目 · 本项目规则本体
+> assistant-agent（Kit）名下的子项目 · 本项目规则本体
 
 一条命令连上 Mac mini 的 tmux：不带参数每次开新会话（名字自动递增），`-s` 按名字接回或新建，`-a` 接回最近一次，`-l` 列会话，任意命令可透传。仓库根的单 bash 脚本。
 
 ## 归谁负责
 
-本项目由 **Kit**（ExecutiveAssistantAgent）负责维护。改动范围跨出本项目时，先向 Kit 说明，不自行扩张改动面。
+本项目由 **Kit**（assistant-agent）负责维护。改动范围跨出本项目时，先向 Kit 说明，不自行扩张改动面。
 
 ## 你的角色
 

@@ -46,8 +46,8 @@
 两机的 `~/Developer` 是全量镜像、目录结构一致（只差 home：本机 `/Users/xhq` → macmini `/Users/mac`）。所以**新建会话默认落在本机当前目录对应的 macmini 路径**：
 
 ```bash
-cd ~/Developer/ExecutiveAssistantAgent
-macmini-tmux          # 远端会话直接开在 ~/Developer/ExecutiveAssistantAgent
+cd ~/Developer/assistant-agent
+macmini-tmux          # 远端会话直接开在 ~/Developer/assistant-agent
 ```
 
 - 本机 cwd 不在 home 下（如 `/tmp`）→ 回落成远端 `$HOME`
@@ -116,7 +116,7 @@ MACMINI_HOST=mac-mini-lan macmini tmux
 
 ## 相关
 
-本仓库是 [ExecutiveAssistantAgent](https://github.com/xhqing/ExecutiveAssistantAgent)（Kit）的子项目。仓库根目录的 `AGENTS.md` 与 `.pi` 是指回该 Agent 项目的软链接，用于在子项目目录开会话时继承同一套规则与技能。
+本仓库是 [assistant-agent](https://github.com/xhqing/assistant-agent)（Kit）的子项目。仓库根目录的 `AGENTS.md` 与 `.pi` 是本仓库自己的文件（本项目规则与工具）——Agent 项目与子项目自 2026-11-08 起完全独立。
 
 ## 许可证与署名
 

@@ -1,5 +1,10 @@
 # Changelog
 
+### 变更（Kit 项目更名为 assistant-agent，2026-11-09）
+
+- **为什么改**：Kit 的 Agent 项目 2026-11-09 由 `ExecutiveAssistantAgent` 更名为 `assistant-agent`——项目名只求「尽可能简单、能体现主要职责」，不再要求以 `Agent` 结尾；项目性质改由 `README.md` 的 `Type-AI Agent` 徽章判定，与名字无关。本仓库是 Kit 名下的子项目，文档与规则里指代该项目的名字不同步就会指错对象。
+- **改了什么**：`AGENTS.md` 归属说明两处改名；`README.md` / `README_cn.md` 的示例路径（`~/Developer/assistant-agent`）与子项目说明段改名，并更正一段过时描述——原文说「根目录 `AGENTS.md` 与 `.pi` 是指回 Agent 项目的软链接」，2026-11-08 起两边已改为完全独立，本仓库自带实体 `AGENTS.md` 与 `.pi`。
+
 ### 新增（CI 门禁：validate 检查 + main 分支 strict 保护）
 
 - **为什么改**：用户 2026-11-03 立规「新建仓库一律必须 strict 模式的 PR CI」，并要求 28 个不合规的存量仓库统一执行最新标准。本项目此前在 PR 上没有门禁——改动合进 main 全靠人工把关，PR 可以拿旧 main 上通过的检查直接合并，回归防护存在缺口。本次补齐团队要求的「三件套」：PR 上真实跑的 CI 检查 + 挂成 required status check + `required_status_checks.strict = true`。
